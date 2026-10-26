@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10131b">
+  <title>PocketWise — Student Expense Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="PocketWise home">
+        <span class="brand-mark">P</span>
+        <span>PocketWise<small>STUDENT FINANCE</small></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-link active" data-page="dashboard"><span>▦</span> Dashboard</button>
+        <button class="nav-link" data-page="transactions"><span>↕</span> Transactions</button>
+        <button class="nav-link" data-page="budgets"><span>◴</span> Budgets</button>
+        <button class="nav-link" data-page="savings"><span>◇</span> Savings goals</button>
+        <button class="nav-link" data-page="reports"><span>▥</span> Reports</button>
+        <button class="nav-link" data-page="settings"><span>⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tip-card">
+          <span class="tip-icon">✦</span>
+          <b>Small steps add up.</b>
+          <p>Track today. Thank yourself later.</p>
+        </div>
+        <button class="nav-link" id="exportSideBtn"><span>⇩</span> Export data</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div>
+          <p class="eyebrow" id="todayLabel">YOUR MONEY, MADE CLEAR</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <span class="date-chip" id="headerDate"></span>
+          <button class="primary-btn" id="quickAddBtn">＋ Add transaction</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="welcome-row">
+          <div><h2 id="welcomeTitle">Your financial snapshot</h2><p>Here’s how your money is doing.</p></div>
+          <select id="dashboardPeriod" class="select-control" aria-label="Dashboard period">
+            <option value="month">This month</option><option value="all">All time</option>
+          </select>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Current balance</span><span class="stat-icon purple">₹</span></div><strong id="statBalance">₹0.00</strong><small id="balanceCaption">Income minus expenses</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Income</span><span class="stat-icon green">↗</span></div><strong id="statIncome">₹0.00</strong><small class="positive">Money received</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Expenses</span><span class="stat-icon orange">↘</span></div><strong id="statExpense">₹0.00</strong><small id="expenseCaption">Money spent</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Savings rate</span><span class="stat-icon blue">％</span></div><strong id="statSavingsRate">0%</strong><small>Income kept after spending</small></article>
+        </div>
+
+        <div class="content-grid">
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><h3>Cash flow</h3><p>Income and expenses over time</p></div><span class="legend"><i class="legend-income"></i> Income <i class="legend-expense"></i> Expenses</span></div>
+            <div class="chart-wrap"><canvas id="cashflowChart" aria-label="Cash flow chart"></canvas><p class="chart-fallback hidden" id="cashflowFallback">Add transactions to see your cash flow.</p></div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><h3>Spending breakdown</h3><p>Where your money goes</p></div><button class="text-btn" data-go="reports">Details ↗</button></div>
+            <div class="donut-wrap"><canvas id="categoryChart" aria-label="Spending by category"></canvas><p class="chart-fallback hidden" id="categoryFallback">No expenses yet.</p></div>
+            <div id="categoryLegend" class="category-legend"></div>
+          </article>
+        </div>
+
+        <article class="panel">
+          <div class="panel-heading"><div><h3>Recent transactions</h3><p>Your latest money activity</p></div><button class="text-btn" data-go="transactions">View all ↗</button></div>
+          <div id="recentTransactions"></div>
+        </article>
+
+        <div class="content-grid lower-grid">
+          <article class="panel"><div class="panel-heading"><div><h3>Budget progress</h3><p>Monthly spending limits</p></div><button class="text-btn" data-go="budgets">Manage ↗</button></div><div id="dashboardBudgets" class="stack-list"></div></article>
+          <article class="panel"><div class="panel-heading"><div><h3>Savings goals</h3><p>Keep moving toward what matters</p></div><button class="text-btn" data-go="savings">View goals ↗</button></div><div id="dashboardGoals" class="stack-list"></div></article>
+        </div>
+      </section>
+
+      <section class="page" id="page-transactions">
+        <div class="section-toolbar"><div><h2>Transactions</h2><p>Record, search, edit, or delete any money movement.</p></div><button class="primary-btn" id="addTransactionBtn">＋ New transaction</button></div>
+        <div class="panel filters-panel">
+          <input id="transactionSearch" class="input-control" type="search" placeholder="Search title, category, or note…">
+          <select id="typeFilter" class="select-control"><option value="all">All types</option><option value="expense">Expenses</option><option value="income">Income</option></select>
+          <select id="categoryFilter" class="select-control"><option value="all">All categories</option></select>
+          <input id="fromDateFilter" class="input-control date-input" type="date" aria-label="From date">
+          <input id="toDateFilter" class="input-control date-input" type="date" aria-label="To date">
+          <button class="secondary-btn" id="clearFiltersBtn">Clear</button>
+        </div>
+        <div class="panel table-panel"><div id="transactionSummary" class="table-summary"></div><div id="transactionsTable"></div></div>
+      </section>
+
+      <section class="page" id="page-budgets">
+        <div class="section-toolbar"><div><h2>Budgets</h2><p>Set monthly limits and see how much you have left.</p></div><button class="primary-btn" id="addBudgetBtn">＋ Create budget</button></div>
+        <div class="stats-grid compact-stats">
+          <article class="stat-card"><span class="muted">Total monthly limits</span><strong id="budgetTotal">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Spent this month</span><strong id="budgetSpent">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Remaining limits</span><strong id="budgetRemaining">₹0.00</strong></article>
+        </div>
+        <div id="budgetsList" class="budget-grid"></div>
+      </section>
+
+      <section class="page" id="page-savings">
+        <div class="section-toolbar"><div><h2>Savings goals</h2><p>Give your plans a name, a target, and a little progress every day.</p></div><button class="primary-btn" id="addGoalBtn">＋ New goal</button></div>
+        <div class="stats-grid compact-stats">
+          <article class="stat-card"><span class="muted">Total target</span><strong id="goalTotal">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Saved so far</span><strong id="goalSaved">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Still needed</span><strong id="goalRemaining">₹0.00</strong></article>
+        </div>
+        <div id="goalsList" class="goal-grid"></div>
+      </section>
+
+      <section class="page" id="page-reports">
+        <div class="section-toolbar"><div><h2>Reports</h2><p>Understand your spending patterns with your own recorded data.</p></div><div class="toolbar-actions"><select id="reportPeriod" class="select-control"><option value="month">This month</option><option value="lastMonth">Last month</option><option value="year">This year</option><option value="all">All time</option></select><button class="secondary-btn" id="exportReportBtn">Export CSV</button></div></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="muted">Report income</span><strong id="reportIncome">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Report expenses</span><strong id="reportExpense">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Net cash flow</span><strong id="reportNet">₹0.00</strong></article>
+          <article class="stat-card"><span class="muted">Transactions</span><strong id="reportCount">0</strong></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel"><div class="panel-heading"><div><h3>Category totals</h3><p>Expense totals for the selected period</p></div></div><div id="reportCategories" class="stack-list"></div></article>
+          <article class="panel"><div class="panel-heading"><div><h3>Monthly comparison</h3><p>Income and expenses</p></div></div><div class="chart-wrap"><canvas id="reportChart" aria-label="Monthly report chart"></canvas><p class="chart-fallback hidden" id="reportFallback">No data for this period.</p></div></article>
+        </div>
+        <article class="panel"><div class="panel-heading"><div><h3>Insights</h3><p>Automatically calculated from your transactions</p></div></div><div id="reportInsights" class="insight-grid"></div></article>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="section-toolbar"><div><h2>Settings</h2><p>Personalise your tracker and manage your data.</p></div></div>
+        <div class="settings-grid">
+          <article class="panel settings-panel">
+            <h3>Personal preferences</h3><p class="muted">These settings are saved on this device.</p>
+            <form id="settingsForm" class="form-stack">
+              <label>Display name<input id="settingName" class="input-control" maxlength="40" placeholder="e.g. Student"></label>
+              <label>Currency<select id="settingCurrency" class="select-control"><option value="INR">INR — Indian Rupee (₹)</option><option value="USD">USD — US Dollar ($)</option><option value="EUR">EUR — Euro (€)</option><option value="GBP">GBP — British Pound (£)</option></select></label>
+              <label>Monthly starting balance<input id="settingOpening" class="input-control" type="number" min="0" step="0.01" placeholder="0.00"></label>
+              <button class="primary-btn" type="submit">Save settings</button>
+            </form>
+          </article>
+          <article class="panel settings-panel">
+            <h3>Data management</h3><p class="muted">Your data is stored in this browser using localStorage. It is not automatically synced to another device.</p>
+            <div class="settings-action"><div><b>Download a backup</b><p>Save all your records as a JSON file.</p></div><button class="secondary-btn" id="backupBtn">Download JSON</button></div>
+            <div class="settings-action"><div><b>Restore a backup</b><p>Import a PocketWise JSON backup.</p></div><button class="secondary-btn" id="restoreBtn">Choose file</button><input id="restoreInput" type="file" accept=".json,application/json" hidden></div>
+            <div class="settings-action danger-action"><div><b>Clear all data</b><p>Permanently delete transactions, budgets, and goals from this browser.</p></div><button class="danger-btn" id="clearDataBtn">Clear data</button></div>
+          </article>
+        </div>
+        <div class="privacy-note">🔒 <span><b>Your privacy:</b> this version saves data locally in your browser. Clearing browser site data can remove it, so download backups regularly.</span></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-heading"><div><p class="eyebrow">POCKETWISE</p><h2 id="modalTitle">Add transaction</h2></div><button class="icon-btn" id="closeModalBtn" aria-label="Close dialog">×</button></div>
+      <div id="modalBody"></div>
+    </section>
+  </div>
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+</body>
+</html>
